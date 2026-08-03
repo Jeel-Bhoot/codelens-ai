@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref — no point building a commit that
+# has already been replaced.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, format and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npx prettier --check "src/**/*.{js,jsx,css}"
+
+      - name: Lint
+        # Zero tolerance: the project ships with no warnings, and this keeps
+        # it that way rather than letting them accumulate.
+        run: npx eslint . --max-warnings 0
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Smoke test the running app
+        run: |
+          npm run start -- -p 3000 &
+          SERVER_PID=$!
+
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+
+          echo "— health —"
+          curl -sf http://localhost:3000/api/health
+
+          echo "— no authentication surface exists —"
+          for gone in /login /signup /verify /api/auth/session; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000$gone")
+            echo "$code $gone"
+            [ "$code" = "404" ] || exit 1
+          done
+
+          echo "— every app route is reachable with no account —"
+          for open_route in /review /dashboard /history /settings; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3000$open_route")
+            echo "$code $open_route"
+            [ "$code" = "200" ] || exit 1
+          done
+
+          echo "— monaco is served from our own origin, not a CDN —"
+          curl -sf -o /dev/null http://localhost:3000/monaco/vs/loader.js || exit 1
+
+          echo "— routes —"
+          for path in / /review; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L "http://localhost:3000$path")
+            echo "$code $path"
+            [ "$code" = "200" ] || exit 1
+          done
+
+          echo "— streaming review (demo mode) —"
+          curl -sf -X POST http://localhost:3000/api/review \
+            -H 'Content-Type: application/json' \
+            -d '{"files":[{"name":"a.jsx","content":"export default () => <img src=\"x\" />;"}]}' \
+            | grep -q 'event: complete' || exit 1
+
+          kill $SERVER_PID
