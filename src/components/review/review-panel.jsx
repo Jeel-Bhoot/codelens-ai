@@ -117,7 +117,7 @@ export function ReviewPanel() {
   return (
     <div className="flex h-full flex-col">
       {/* ------------------------------------------------------- header -- */}
-      <div className="border-b p-4">
+      <div className="shrink-0 border-b p-4">
         <div className="flex items-start gap-4">
           {run.status === 'complete' ? (
             <ScoreRing score={score} size={78} strokeWidth={7} />
@@ -179,204 +179,208 @@ export function ReviewPanel() {
         ) : null}
       </div>
 
-      {/* ---------------------------------------------------- reasoning -- */}
-      {showReasoning && run.reasoning ? (
-        <div className="border-b">
-          <button
-            type="button"
-            onClick={() => setReasoningOverride(!reasoningOpen)}
-            aria-expanded={reasoningOpen}
-            className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Brain className="h-3.5 w-3.5" aria-hidden="true" />
-            Reasoning
-            {run.status === 'reasoning' ? (
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            ) : null}
-            <ChevronDown
-              className={cn(
-                'ml-auto h-3.5 w-3.5 transition-transform',
-                reasoningOpen && 'rotate-180'
-              )}
-              aria-hidden="true"
-            />
-          </button>
-
-          {reasoningOpen ? (
-            <div
-              ref={reasoningRef}
-              className="scrollbar-thin max-h-44 overflow-y-auto border-t bg-muted/20 px-4 py-3"
+      {/* Everything below the header scrolls as one region, so the summary
+          and verdict can never squeeze the findings list out of view. */}
+      <div ref={listRef} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
+        {/* ---------------------------------------------------- reasoning -- */}
+        {showReasoning && run.reasoning ? (
+          <div className="border-b">
+            <button
+              type="button"
+              onClick={() => setReasoningOverride(!reasoningOpen)}
+              aria-expanded={reasoningOpen}
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <p
+              <Brain className="h-3.5 w-3.5" aria-hidden="true" />
+              Reasoning
+              {run.status === 'reasoning' ? (
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+              ) : null}
+              <ChevronDown
                 className={cn(
-                  'whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-muted-foreground',
-                  run.status === 'reasoning' && 'streaming-caret'
+                  'ml-auto h-3.5 w-3.5 transition-transform',
+                  reasoningOpen && 'rotate-180'
                 )}
+                aria-hidden="true"
+              />
+            </button>
+
+            {reasoningOpen ? (
+              <div
+                ref={reasoningRef}
+                className="scrollbar-thin max-h-44 overflow-y-auto border-t bg-muted/20 px-4 py-3"
               >
-                {run.reasoning}
-              </p>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* ------------------------------------------------------ summary -- */}
-      {run.summary ? (
-        <div className="border-b px-4 py-3">
-          <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-p:text-sm prose-p:leading-relaxed">
-            <Markdown>{run.summary.overview || ''}</Markdown>
-          </div>
-
-          {run.summary.strengths?.length ? (
-            <ul className="mt-3 space-y-1">
-              {run.summary.strengths.map((strength) => (
-                <li key={strength} className="flex gap-2 text-xs text-muted-foreground">
-                  <Sparkles
-                    className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500"
-                    aria-hidden="true"
-                  />
-                  {strength}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* ------------------------------------------------------ filters -- */}
-      {run.findings.length ? (
-        <div className="flex items-center gap-2 border-b px-4 py-2">
-          <div className="relative flex-1">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter findings…"
-              className="h-8 pl-8 text-xs"
-              aria-label="Filter findings by text"
-            />
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon-sm">
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-                <span className="sr-only">Filter by severity and category</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>Severity</DropdownMenuLabel>
-              {SEVERITY_ORDER.map((severity) => (
-                <DropdownMenuCheckboxItem
-                  key={severity}
-                  checked={severities.includes(severity)}
-                  onCheckedChange={() => toggle(severities, setSeverities, severity)}
-                  onSelect={(e) => e.preventDefault()}
+                <p
+                  className={cn(
+                    'whitespace-pre-wrap font-mono text-[11px] leading-relaxed text-muted-foreground',
+                    run.status === 'reasoning' && 'streaming-caret'
+                  )}
                 >
-                  {SEVERITIES[severity].label}
-                  <span className="ml-auto text-xs text-muted-foreground">
-                    {counts[severity] ?? 0}
-                  </span>
-                </DropdownMenuCheckboxItem>
-              ))}
-
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Category</DropdownMenuLabel>
-              {CATEGORY_KEYS.map((key) => (
-                <DropdownMenuCheckboxItem
-                  key={key}
-                  checked={categories.includes(key)}
-                  onCheckedChange={() => toggle(categories, setCategories, key)}
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  {CATEGORIES[key].label}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ) : null}
-
-      {/* ----------------------------------------------------- findings -- */}
-      <div ref={listRef} className="scrollbar-thin flex-1 space-y-2 overflow-y-auto p-3">
-        {visible.map((finding) => (
-          <FindingCard
-            key={finding.id}
-            finding={finding}
-            isFocused={finding.id === focusedFindingId}
-          />
-        ))}
-
-        {isStreaming ? (
-          <div className="space-y-2 rounded-lg border border-dashed p-3">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-3.5 w-3/4" />
-            <Skeleton className="h-3 w-1/3" />
+                  {run.reasoning}
+                </p>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
-        {!visible.length && !isStreaming ? (
-          <div className="grid place-items-center py-16 text-center">
-            <div>
-              {run.findings.length ? (
-                <>
-                  <p className="text-sm font-medium">No findings match those filters</p>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => {
-                      setQuery('');
-                      setSeverities([]);
-                      setCategories([]);
-                    }}
-                  >
-                    Clear filters
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" aria-hidden="true" />
-                  <p className="mt-3 text-sm font-medium">Nothing to flag</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    This pass found no issues worth reporting.
-                  </p>
-                </>
-              )}
+        {/* ------------------------------------------------------ summary -- */}
+        {run.summary ? (
+          <div className="border-b px-4 py-3">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-p:text-sm prose-p:leading-relaxed">
+              <Markdown>{run.summary.overview || ''}</Markdown>
             </div>
+
+            {run.summary.strengths?.length ? (
+              <ul className="mt-3 space-y-1">
+                {run.summary.strengths.map((strength) => (
+                  <li key={strength} className="flex gap-2 text-xs text-muted-foreground">
+                    <Sparkles
+                      className="mt-0.5 h-3 w-3 shrink-0 text-emerald-500"
+                      aria-hidden="true"
+                    />
+                    {strength}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
+        ) : null}
+
+        {/* ------------------------------------------------------ filters -- */}
+        {run.findings.length ? (
+          <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-background px-4 py-2">
+            <div className="relative flex-1">
+              <Search
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Filter findings…"
+                className="h-8 pl-8 text-xs"
+                aria-label="Filter findings by text"
+              />
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon-sm">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  <span className="sr-only">Filter by severity and category</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel>Severity</DropdownMenuLabel>
+                {SEVERITY_ORDER.map((severity) => (
+                  <DropdownMenuCheckboxItem
+                    key={severity}
+                    checked={severities.includes(severity)}
+                    onCheckedChange={() => toggle(severities, setSeverities, severity)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {SEVERITIES[severity].label}
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      {counts[severity] ?? 0}
+                    </span>
+                  </DropdownMenuCheckboxItem>
+                ))}
+
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Category</DropdownMenuLabel>
+                {CATEGORY_KEYS.map((key) => (
+                  <DropdownMenuCheckboxItem
+                    key={key}
+                    checked={categories.includes(key)}
+                    onCheckedChange={() => toggle(categories, setCategories, key)}
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    {CATEGORIES[key].label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : null}
+
+        {/* ----------------------------------------------------- findings -- */}
+        <div className="space-y-2 p-3">
+          {visible.map((finding) => (
+            <FindingCard
+              key={finding.id}
+              finding={finding}
+              isFocused={finding.id === focusedFindingId}
+            />
+          ))}
+
+          {isStreaming ? (
+            <div className="space-y-2 rounded-lg border border-dashed p-3">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-3.5 w-3/4" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          ) : null}
+
+          {!visible.length && !isStreaming ? (
+            <div className="grid place-items-center py-16 text-center">
+              <div>
+                {run.findings.length ? (
+                  <>
+                    <p className="text-sm font-medium">No findings match those filters</p>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={() => {
+                        setQuery('');
+                        setSeverities([]);
+                        setCategories([]);
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" aria-hidden="true" />
+                    <p className="mt-3 text-sm font-medium">Nothing to flag</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      This pass found no issues worth reporting.
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* ------------------------------------------------------ verdict -- */}
+        {run.done?.verdict ? (
+          <>
+            <Separator />
+            <div className="bg-muted/20 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Verdict
+              </p>
+              <p className="mt-1 text-sm leading-relaxed">{run.done.verdict}</p>
+
+              {run.done.topPriorities?.length ? (
+                <ol className="mt-2.5 space-y-1">
+                  {run.done.topPriorities.map((priority, index) => (
+                    <li key={priority} className="flex gap-2 text-xs text-muted-foreground">
+                      <span className="font-semibold text-foreground">{index + 1}.</span>
+                      {priority}
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
+            </div>
+          </>
         ) : null}
       </div>
 
-      {/* ------------------------------------------------------ verdict -- */}
-      {run.done?.verdict ? (
-        <>
-          <Separator />
-          <div className="bg-muted/20 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Verdict
-            </p>
-            <p className="mt-1 text-sm leading-relaxed">{run.done.verdict}</p>
-
-            {run.done.topPriorities?.length ? (
-              <ol className="mt-2.5 space-y-1">
-                {run.done.topPriorities.map((priority, index) => (
-                  <li key={priority} className="flex gap-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground">{index + 1}.</span>
-                    {priority}
-                  </li>
-                ))}
-              </ol>
-            ) : null}
-          </div>
-        </>
-      ) : null}
-
       {/* usage footer — only meaningful for live runs */}
       {run.usage ? (
-        <div className="border-t px-4 py-2">
+        <div className="shrink-0 border-t px-4 py-2">
           <Tooltip content="Cached tokens are billed at roughly a tenth of the input rate.">
             <p className="font-mono text-[10px] text-muted-foreground">
               {run.usage.input.toLocaleString()} in · {run.usage.output.toLocaleString()} out

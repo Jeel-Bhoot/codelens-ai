@@ -56,7 +56,9 @@ export function checkRateLimit(key, { limit = 10, windowMs = 60_000 } = {}) {
 export function clientKey(request) {
   // Written by the edge and not forwardable by a client.
   const verified =
-    request.headers.get('x-vercel-forwarded-for') || request.headers.get('cf-connecting-ip');
+    request.headers.get('x-vercel-forwarded-for') ||
+    request.headers.get('x-nf-client-connection-ip') ||
+    request.headers.get('cf-connecting-ip');
   if (verified) return truncate(verified.trim());
 
   const forwarded = request.headers.get('x-forwarded-for');
