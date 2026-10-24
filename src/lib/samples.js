@@ -12,7 +12,7 @@
 const PRODUCT_LIST = `import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingCart } from 'lucide-react';
 
-const API_TOKEN = "REDACTED_STRIPE_KEY";
+const API_TOKEN = "YOUR_API_TOKEN_HERE";
 
 export default function ProductList({ category, onAddToCart }) {
   const [products, setProducts] = useState([]);
