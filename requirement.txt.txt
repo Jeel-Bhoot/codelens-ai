@@ -2,4 +2,4 @@
 
 This is highly relevant to your React/Next.js background and demonstrates AI integration without requiring a huge backend. It naturally showcases streaming, markdown rendering, syntax highlighting, file uploads, authentication, prompt engineering, and frontend performance.
 
-Resume impact: "Built an AI-powered code review platform with real-time streaming analysis, syntax highlighting, and actionable recommendations for performance, accessibility, and React best practices."
+Resume impact: "Built CodeLensAI, a platform with real-time streaming analysis, syntax highlighting, and actionable recommendations for performance, accessibility, and React best practices."

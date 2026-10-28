@@ -12,7 +12,7 @@ authentication, prompt engineering, and frontend performance."
 
 Target resume line
 ------------------
-"Built an AI-powered code review platform with real-time streaming analysis,
+"Built CodeLensAI, a platform with real-time streaming analysis,
 syntax highlighting, and actionable recommendations for performance,
 accessibility, and React best practices."
 

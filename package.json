@@ -2,7 +2,7 @@
   "name": "codelens",
   "version": "1.0.0",
   "private": true,
-  "description": "AI-powered frontend code review platform with real-time streaming analysis",
+  "description": "CodeLensAI platform with real-time streaming analysis",
   "scripts": {
     "vendor:monaco": "node scripts/copy-monaco.mjs",
     "postinstall": "node scripts/copy-monaco.mjs",

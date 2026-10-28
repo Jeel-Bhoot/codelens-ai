@@ -1,5 +1,5 @@
 export const APP_NAME = 'CodeLens AI';
-export const APP_TAGLINE = 'AI-powered frontend code review';
+export const APP_TAGLINE = 'CodeLensAI';
 export const APP_DESCRIPTION =
   'Paste or upload React, JavaScript and CSS and get a streaming AI review with actionable findings for performance, accessibility, security and React best practices.';
 

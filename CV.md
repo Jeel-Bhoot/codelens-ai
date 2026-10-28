@@ -15,7 +15,7 @@ Streaming AI code review for React and CSS, with line-level findings and one-cli
 
 Pick three or four. Ordered strongest first.
 
-- Built an AI-powered code review platform with real-time streaming analysis, syntax highlighting, and actionable recommendations for performance, accessibility, and React best practices.
+- Built CodeLensAI, a platform with real-time streaming analysis, syntax highlighting, and actionable recommendations for performance, accessibility, and React best practices.
 
 - Engineered a token-level streaming pipeline (SSE + incremental NDJSON parsing) so individual findings render the moment the model completes each one, rather than after the full response — the buffered parser also survives malformed records without failing the review.
 
