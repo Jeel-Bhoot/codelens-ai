@@ -40,8 +40,8 @@ export function ReviewWorkspace() {
     const onRun = () => {
       if (!isRunning) start();
     };
-    document.addEventListener('critiq:run-review', onRun);
-    return () => document.removeEventListener('critiq:run-review', onRun);
+    document.addEventListener('codelens:run-review', onRun);
+    return () => document.removeEventListener('codelens:run-review', onRun);
   }, [start, isRunning]);
 
   return (

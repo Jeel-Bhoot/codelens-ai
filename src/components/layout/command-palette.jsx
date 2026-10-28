@@ -91,7 +91,7 @@ export function CommandPalette() {
                     router.push('/review');
                     // The workspace listens for this and starts a run.
                     setTimeout(
-                      () => document.dispatchEvent(new CustomEvent('critiq:run-review')),
+                      () => document.dispatchEvent(new CustomEvent('codelens:run-review')),
                       160
                     );
                   })

@@ -1,4 +1,4 @@
-# Deploying Critiq for £0
+# Deploying CodeLens AI for £0
 
 This project is designed to deploy and run at zero cost, permanently. No API key, no card, no trial that expires.
 
@@ -12,9 +12,9 @@ Read this once before you deploy — the default configuration is the free one, 
 # 1. Push to GitHub
 git init
 git add -A
-git commit -m "Critiq — AI frontend code reviewer"
+git commit -m "CodeLens AI — AI frontend code reviewer"
 git branch -M main
-git remote add origin https://github.com/<you>/critiq.git
+git remote add origin https://github.com/<you>/codelens.git
 git push -u origin main
 
 # 2. Import at vercel.com/new — accept every default

@@ -36,7 +36,7 @@ export async function exportJson(review) {
 
   await save(
     new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
-    `critiq-report-${stamp()}.json`
+    `codelens-report-${stamp()}.json`
   );
 }
 
@@ -116,7 +116,7 @@ export function buildMarkdown(review) {
 export async function exportMarkdown(review) {
   await save(
     new Blob([buildMarkdown(review)], { type: 'text/markdown;charset=utf-8' }),
-    `critiq-report-${stamp()}.md`
+    `codelens-report-${stamp()}.md`
   );
 }
 
@@ -230,7 +230,7 @@ export async function exportPdf(review) {
     );
   }
 
-  doc.save(`critiq-report-${stamp()}.pdf`);
+  doc.save(`codelens-report-${stamp()}.pdf`);
 }
 
 /* ----------------------------------------------------------------- ZIP -- */
@@ -246,5 +246,5 @@ export async function exportZip(review) {
   review.files.forEach((file) => src.file(file.name, file.content));
 
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-  await save(blob, `critiq-review-${stamp()}.zip`);
+  await save(blob, `codelens-review-${stamp()}.zip`);
 }

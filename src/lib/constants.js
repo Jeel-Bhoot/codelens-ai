@@ -1,4 +1,4 @@
-export const APP_NAME = 'Critiq';
+export const APP_NAME = 'CodeLens AI';
 export const APP_TAGLINE = 'AI-powered frontend code review';
 export const APP_DESCRIPTION =
   'Paste or upload React, JavaScript and CSS and get a streaming AI review with actionable findings for performance, accessibility, security and React best practices.';
@@ -103,7 +103,7 @@ export const MAX_TOTAL_BYTES = 1024 * 1024; // 1MB per review
 export const MAX_FILES = 20;
 
 export const STORAGE_KEYS = {
-  reviews: 'critiq.reviews.v1',
-  settings: 'critiq.settings.v1',
-  workspace: 'critiq.workspace.v1',
+  reviews: 'codelens.reviews.v1',
+  settings: 'codelens.settings.v1',
+  workspace: 'codelens.workspace.v1',
 };

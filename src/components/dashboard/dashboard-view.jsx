@@ -42,7 +42,7 @@ export function DashboardView() {
           <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary/10 text-primary">
             <ScanSearch className="h-7 w-7" aria-hidden="true" />
           </span>
-          <h1 className="mt-6 text-2xl font-bold tracking-tight">Welcome to Critiq</h1>
+          <h1 className="mt-6 text-2xl font-bold tracking-tight">Welcome to CodeLens AI</h1>
           <p className="mt-2 text-muted-foreground">
             Run your first review and this page fills up with your quality trend, findings breakdown
             and history.

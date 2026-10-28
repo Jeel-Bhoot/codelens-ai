@@ -1,4 +1,4 @@
-# Critiq — AI Frontend Code Reviewer
+# CodeLens AI — AI Frontend Code Reviewer
 
 Paste a React component, watch a principal-level code review stream back in real time. Findings appear one at a time as the model writes them, each pinned to an exact line with a before/after fix you can apply in one click.
 
@@ -360,8 +360,8 @@ See **[DEPLOY.md](DEPLOY.md)** for the full guide — free hosting tiers, the on
 **Docker**
 
 ```bash
-docker build -t critiq .
-docker run -p 3000:3000 -e ANTHROPIC_API_KEY=sk-ant-… critiq
+docker build -t codelens .
+docker run -p 3000:3000 -e ANTHROPIC_API_KEY=sk-ant-… codelens
 ```
 
 ---

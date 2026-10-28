@@ -1,4 +1,4 @@
-# Critiq — CV / interview notes
+# CodeLens AI — CV / interview notes
 
 Copy-ready lines for a CV, and the answers to the questions this project will get asked.
 
@@ -6,7 +6,7 @@ Copy-ready lines for a CV, and the answers to the questions this project will ge
 
 ## One-liner
 
-**Critiq — AI Frontend Code Reviewer** · Next.js 16, React 19, JavaScript, Anthropic API
+**CodeLens AI — AI Frontend Code Reviewer** · Next.js 16, React 19, JavaScript, Anthropic API
 Streaming AI code review for React and CSS, with line-level findings and one-click fixes.
 
 ---

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   return Response.json({
     status: 'ok',
-    service: 'critiq',
+    service: 'codelens',
     ...describeConfiguration(),
     byoKeyAllowed: process.env.NEXT_PUBLIC_ALLOW_BYO_KEY !== 'false',
     timestamp: new Date().toISOString(),

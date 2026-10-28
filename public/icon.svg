@@ -1,12 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Critiq">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="35%" stop-color="#6366F1"/>
+      <stop offset="65%" stop-color="#A855F7"/>
+      <stop offset="85%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#g)"/>
-  <path d="M24 22 L14 32 L24 42" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M40 22 L50 32 L40 42" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="32" cy="32" r="3.5" fill="#fff"/>
+
+  <!-- Gradient background -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)"/>
+
+  <!-- White </> icon -->
+  <g transform="translate(256 256) scale(0.64) translate(-260 -210)"
+     fill="none" stroke="#FFFFFF" stroke-width="38" stroke-linecap="round" stroke-linejoin="miter">
+    <polyline points="158,102 45,215 158,328"/>
+    <line x1="307" y1="50" x2="212" y2="370"/>
+    <polyline points="362,102 475,215 362,328"/>
+  </g>
 </svg>

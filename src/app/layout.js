@@ -33,7 +33,7 @@ export const metadata = {
     'frontend',
     'static analysis',
   ],
-  authors: [{ name: 'Critiq' }],
+  authors: [{ name: 'CodeLens AI' }],
   // Declared explicitly: the icon lives in /public rather than app/, so Next
   // does not emit the <link> for it and browsers fall back to probing
   // /favicon.ico — a guaranteed 404 in every visitor's console.

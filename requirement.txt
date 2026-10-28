@@ -1,5 +1,5 @@
 ===============================================================================
-CRITIQ — AI FRONTEND CODE REVIEWER
+CODELENS AI — AI FRONTEND CODE REVIEWER
 Project requirements & technical specification
 ===============================================================================
 

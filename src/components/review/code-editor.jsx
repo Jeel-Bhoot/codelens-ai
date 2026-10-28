@@ -66,11 +66,11 @@ function PlainTextEditor({ file, onChange, fontSize, onRetry }) {
 }
 
 const SEVERITY_GLYPH = {
-  critical: 'critiq-marker-critical',
-  high: 'critiq-marker-high',
-  medium: 'critiq-marker-medium',
-  low: 'critiq-marker-low',
-  info: 'critiq-marker-info',
+  critical: 'codelens-marker-critical',
+  high: 'codelens-marker-high',
+  medium: 'codelens-marker-medium',
+  low: 'codelens-marker-low',
+  info: 'codelens-marker-info',
 };
 
 export function CodeEditor() {
@@ -117,7 +117,7 @@ export function CodeEditor() {
       options: {
         isWholeLine: true,
         linesDecorationsClassName: SEVERITY_GLYPH[finding.severity],
-        className: finding.id === focusedFindingId ? 'critiq-line-focused' : undefined,
+        className: finding.id === focusedFindingId ? 'codelens-line-focused' : undefined,
         hoverMessage: { value: `**${finding.title}**\n\n${finding.description}` },
       },
     }));
@@ -166,7 +166,7 @@ export function CodeEditor() {
       {editorStatus === 'ready' ? (
         <MonacoEditor
           height="100%"
-          theme={resolvedTheme === 'dark' ? 'critiq-dark' : 'critiq-light'}
+          theme={resolvedTheme === 'dark' ? 'codelens-dark' : 'codelens-light'}
           language={languageFromFilename(activeFile.name)}
           path={activeFile.name}
           value={activeFile.content}
@@ -174,7 +174,7 @@ export function CodeEditor() {
           beforeMount={(monaco) => {
             // Themes must exist before the first render or Monaco falls back
             // to vs-dark and flashes on the next paint.
-            monaco.editor.defineTheme('critiq-dark', {
+            monaco.editor.defineTheme('codelens-dark', {
               base: 'vs-dark',
               inherit: true,
               rules: [],
@@ -185,7 +185,7 @@ export function CodeEditor() {
                 'editorLineNumber.foreground': '#475569',
               },
             });
-            monaco.editor.defineTheme('critiq-light', {
+            monaco.editor.defineTheme('codelens-light', {
               base: 'vs',
               inherit: true,
               rules: [],
@@ -219,38 +219,6 @@ export function CodeEditor() {
           }}
         />
       ) : null}
-
-      {/* Gutter marker styles — scoped here because they only exist for
-          Monaco's decoration API, which takes class names, not elements. */}
-      <style jsx global>{`
-        .critiq-marker-critical,
-        .critiq-marker-high,
-        .critiq-marker-medium,
-        .critiq-marker-low,
-        .critiq-marker-info {
-          width: 4px !important;
-          margin-left: 4px;
-          border-radius: 2px;
-        }
-        .critiq-marker-critical {
-          background: hsl(var(--severity-critical));
-        }
-        .critiq-marker-high {
-          background: hsl(var(--severity-high));
-        }
-        .critiq-marker-medium {
-          background: hsl(var(--severity-medium));
-        }
-        .critiq-marker-low {
-          background: hsl(var(--severity-low));
-        }
-        .critiq-marker-info {
-          background: hsl(var(--severity-info));
-        }
-        .critiq-line-focused {
-          background: hsl(var(--primary) / 0.14);
-        }
-      `}</style>
     </div>
   );
 }

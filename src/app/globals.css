@@ -145,3 +145,33 @@ pre {
   max-width: 100%;
   overflow-x: auto;
 }
+
+/* Monaco gutter markers — the decoration API takes class names, not
+   elements, so these have to live in global CSS. */
+.codelens-marker-critical,
+.codelens-marker-high,
+.codelens-marker-medium,
+.codelens-marker-low,
+.codelens-marker-info {
+  width: 4px !important;
+  margin-left: 4px;
+  border-radius: 2px;
+}
+.codelens-marker-critical {
+  background: hsl(var(--severity-critical));
+}
+.codelens-marker-high {
+  background: hsl(var(--severity-high));
+}
+.codelens-marker-medium {
+  background: hsl(var(--severity-medium));
+}
+.codelens-marker-low {
+  background: hsl(var(--severity-low));
+}
+.codelens-marker-info {
+  background: hsl(var(--severity-info));
+}
+.codelens-line-focused {
+  background: hsl(var(--primary) / 0.14);
+}

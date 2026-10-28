@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { LandingPreview } from '@/components/landing/landing-preview';
+import { AppLogo } from '@/components/layout/app-logo';
 import { APP_NAME, APP_TAGLINE, CATEGORIES } from '@/lib/constants';
 
 const CATEGORY_ICONS = {
@@ -74,11 +75,8 @@ export default function LandingPage() {
           className="container flex h-16 items-center justify-between"
           aria-label="Primary navigation"
         >
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-bold text-white">
-              C
-            </span>
-            {APP_NAME}
+          <Link href="/" aria-label={APP_NAME}>
+            <AppLogo />
           </Link>
 
           <div className="flex items-center gap-2">

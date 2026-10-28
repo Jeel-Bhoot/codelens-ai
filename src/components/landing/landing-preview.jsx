@@ -74,7 +74,7 @@ export function LandingPreview() {
             <span className="h-3 w-3 rounded-full bg-emerald-500/70" />
           </span>
           <span className="ml-2 font-mono text-xs text-muted-foreground">
-            critiq — reviewing ProductList.jsx
+            codelens — reviewing ProductList.jsx
           </span>
           <span className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
             {streaming ? (

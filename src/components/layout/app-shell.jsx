@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { CommandPalette } from '@/components/layout/command-palette';
+import { AppLogo } from '@/components/layout/app-logo';
 import { APP_NAME } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -63,11 +64,8 @@ export function AppShell({ children }) {
       {/* -------------------------------------------------- desktop rail */}
       <aside className="hidden w-60 shrink-0 flex-col border-r bg-card/40 lg:flex">
         <div className="flex h-16 items-center px-5">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-bold text-white">
-              C
-            </span>
-            {APP_NAME}
+          <Link href="/" aria-label={APP_NAME}>
+            <AppLogo />
           </Link>
         </div>
 
@@ -101,7 +99,7 @@ export function AppShell({ children }) {
           />
           <div className="relative h-full w-64 animate-fade-up border-r bg-card p-4">
             <div className="mb-6 flex items-center justify-between">
-              <span className="font-semibold">{APP_NAME}</span>
+              <AppLogo />
               <Button
                 variant="ghost"
                 size="icon-sm"
