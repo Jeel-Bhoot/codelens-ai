@@ -1,43 +1,295 @@
 # CodeLens AI — AI Frontend Code Reviewer
 
-Paste a React component, watch a principal-level code review stream back in real time. Findings appear one at a time as the model writes them, each pinned to an exact line with a before/after fix you can apply in one click.
+**CodeLens AI reviews your React and CSS code with AI and shows you exactly what to fix.**
 
-Built with Next.js 16 and React 19. Runs on **Claude** or **Gemini** — or on a local rule engine with no key at all. **JavaScript, not TypeScript.**
+Paste a component (or upload files), click **Run review**, and a detailed code review streams back in real time. Each problem it finds appears as a card, pinned to the exact line, with an explanation and a before/after fix you can apply in one click.
+
+Built with **Next.js 16** and **React 19**, written in **JavaScript**. It runs on **Google Gemini** (free), **Anthropic Claude** (paid), or a built-in local rule engine that needs no API key at all.
+
+---
+
+## Table of contents
+
+- [About the project](#about-the-project)
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Getting started](#getting-started)
+  - [Prerequisites](#1-prerequisites)
+  - [Installation](#2-installation)
+  - [Setup (environment variables)](#3-setup-environment-variables)
+  - [Run the app](#4-run-the-app)
+- [How to use it](#how-to-use-it)
+- [Review engine modes](#review-engine-modes)
+- [Environment variables reference](#environment-variables-reference)
+- [Available scripts](#available-scripts)
+- [Project structure](#project-structure)
+- [How it works](#how-it-works)
+- [Deployment](#deployment)
+- [Troubleshooting](#troubleshooting)
+- [Keyboard shortcuts](#keyboard-shortcuts)
+- [Licence](#licence)
+
+---
+
+## About the project
+
+Code review takes time, and small frontend mistakes (a missing `key` prop, an image with no `alt` text, an unnecessary re-render) are easy to miss. CodeLens AI acts like a senior frontend reviewer that is always available.
+
+It checks your code through **six lenses**:
+
+| Lens                     | Examples of what it catches                                  |
+| ------------------------ | ------------------------------------------------------------ |
+| **Performance**          | Unnecessary re-renders, expensive work inside render         |
+| **Accessibility**        | Missing `alt` text, unlabeled inputs, keyboard traps         |
+| **React best practices** | Missing `key` props, misused hooks, derived state in effects |
+| **Security**             | `dangerouslySetInnerHTML`, `eval`, hard-coded secrets        |
+| **Maintainability**      | Overly large components, duplicated logic                    |
+| **Correctness**          | Loose equality, logic bugs, unhandled edge cases             |
+
+Every finding includes a **severity** (critical → low), the **file and line number**, **why it matters**, and a **concrete fix**. The review also gives your code an overall **quality score from 0 to 100**.
+
+**No sign-up required.** All your files, history and settings are stored in your own browser. Nothing is saved on a server.
+
+---
+
+## Features
+
+| Feature                 | What it means                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| **Live streaming**      | Each finding appears as soon as the AI writes it, so you don't wait for the full reply |
+| **Instant local pass**  | A built-in rule engine checks your code in the browser within ~5 ms                    |
+| **One-click fixes**     | Each fix is shown as a diff; apply it and the editor updates in place                  |
+| **Multi-file upload**   | Drag in files or a `.zip`; each finding links back to the right line                   |
+| **Reasoning panel**     | See the AI's summarised thinking in a collapsible side panel                           |
+| **Score and history**   | 0–100 quality score, saved past reviews and trend charts on a dashboard                |
+| **Export**              | Download the review as PDF, Markdown, JSON or a zip of report + source                 |
+| **Works without a key** | Demo mode uses the local engine, so every feature works with no setup                  |
+| **Dark / light theme**  | Theme toggle, plus a command palette (`Ctrl+K`)                                        |
+
+---
+
+## Tech stack
+
+| Area         | Tools                                                         |
+| ------------ | ------------------------------------------------------------- |
+| Framework    | Next.js 16 (App Router), React 19                             |
+| Language     | JavaScript (with `zod` for runtime validation)                |
+| Styling      | Tailwind CSS, Radix UI primitives, `class-variance-authority` |
+| Code editor  | Monaco Editor (the editor that powers VS Code)                |
+| State        | Zustand (saved to `localStorage`)                             |
+| AI providers | Google Gemini API, Anthropic Claude API                       |
+| Charts       | Recharts                                                      |
+| Export       | jsPDF, JSZip, file-saver                                      |
+| Tooling      | ESLint, Prettier, React Compiler                              |
+
+---
+
+## Getting started
+
+Follow these steps to run the project on your own computer.
+
+### 1. Prerequisites
+
+You need:
+
+- **Node.js 20.9 or newer.** Download it from [nodejs.org](https://nodejs.org/). Check your version with:
+  ```bash
+  node -v
+  ```
+- **npm**, which comes with Node.js.
+- **Git**, to clone the repository ([git-scm.com](https://git-scm.com/)).
+- _(Optional)_ A free **Gemini API key** if you want real AI reviews instead of demo mode. See [step 3](#3-setup-environment-variables).
+
+### 2. Installation
+
+Clone the repository and install the dependencies:
 
 ```bash
+git clone https://github.com/Jeel-Bhoot/codelens-ai.git
+cd codelens-ai
 npm install
-npm run dev          # http://localhost:3000
 ```
 
-No API key needed to try it, and a **free** Gemini key gets you a real model — see [Demo mode](#demo-mode).
+`npm install` also runs a small script ([`scripts/copy-monaco.mjs`](scripts/copy-monaco.mjs)) that copies the Monaco code editor into `public/monaco`. This lets the editor load from your own server instead of a CDN. You don't need to do anything extra.
+
+### 3. Setup (environment variables)
+
+**This step is optional.** With no setup, the app runs in **demo mode** and every feature still works. The reviews come from the local rule engine instead of a real AI model.
+
+To get **real AI reviews for free** with Google Gemini:
+
+1. Get a free API key (no credit card) at **[aistudio.google.com/apikey](https://aistudio.google.com/apikey)**.
+2. Copy the example environment file:
+
+   ```bash
+   # macOS / Linux / Git Bash
+   cp .env.example .env.local
+
+   # Windows PowerShell
+   Copy-Item .env.example .env.local
+   ```
+
+3. Open `.env.local` and paste your key:
+
+   ```env
+   GEMINI_API_KEY=your-key-here
+   ```
+
+4. Save the file and restart the dev server if it is already running.
+
+> **Keep your keys secret.** `.env.local` is already listed in `.gitignore`, so it will never be pushed to GitHub. Never add `NEXT_PUBLIC_` in front of an API key name, because that would expose it to the browser.
+
+To use **Anthropic Claude** (paid) instead, see [Review engine modes](#review-engine-modes).
+
+### 4. Run the app
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Then open **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+To run an optimised production build instead:
+
+```bash
+npm run build
+npm run start
+```
+
+To check which AI provider is active, open [http://localhost:3000/api/health](http://localhost:3000/api/health). It shows the provider and model but never the key.
 
 ---
 
-## What it does
+## How to use it
 
-Six lenses over the same code: **performance**, **accessibility**, **React best practices**, **security**, **maintainability**, **correctness**. Every finding carries a severity, a file and line, why it matters, and a concrete fix.
-
-|                        |                                                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Streaming**          | Findings render the instant each one is written, not at end of response                                  |
-| **Instant local pass** | A deterministic rule engine runs in the browser on paste — findings in ~5ms, before the network responds |
-| **One-click fixes**    | Every fix is a diff; apply it and the editor is patched in place                                         |
-| **Multi-file**         | Drag files or a `.zip`; findings link back to the offending line                                         |
-| **Reasoning panel**    | The model's summarised thinking streams into its own collapsible pane                                    |
-| **Scoring & history**  | 0–100 quality score, saved reviews, trend charts                                                         |
-| **Export**             | PDF, Markdown, JSON (for a CI gate), or a zip of report + source                                         |
+1. Open the app and go to **Review**.
+2. **Add code** in one of three ways:
+   - paste code straight into the editor,
+   - drag and drop files or a `.zip` onto the file manager, or
+   - load one of the built-in sample components.
+3. Click **Run review** (or press `Ctrl+Enter` / `⌘+Enter`).
+4. Watch findings appear. Local findings show instantly, and AI findings stream in one by one.
+5. Click a finding to jump to its line. Click **Apply fix** to patch the code in the editor.
+6. **Export** the review as PDF, Markdown, JSON or a zip.
+7. Open **History** to see past reviews and **Dashboard** to see score trends over time.
+8. In **Settings** you can choose a different Gemini model, or paste your own API key. A key you paste there is stored only in your browser.
 
 ---
 
-## The part worth reading
+## Review engine modes
 
-### Findings stream individually, not in a batch
+The app picks a review engine automatically, depending on what you configure:
 
-Most "streaming AI" UIs stream _text_. That's easy. Streaming **structured findings** — so each card appears the moment it's complete — is the actual problem, and it's solved in three pieces.
+| Your configuration                               | What runs                                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Nothing (no `.env.local`)                        | **Demo mode.** Local rule engine. Every feature works, but it isn't real AI.   |
+| `GEMINI_API_KEY` set                             | **Live AI from Gemini** (`gemini-3.5-flash` by default). Free, no credit card. |
+| `ANTHROPIC_API_KEY` + `ALLOW_PAID_PROVIDER=true` | **Live AI from Claude** (`claude-opus-5` by default). Paid per use.            |
+| Both Gemini and Anthropic keys set               | **Gemini is used**, because it's free.                                         |
+| A visitor pastes their own key in Settings       | Live AI on **their** key. It is kept only in their browser.                    |
+| `NEXT_PUBLIC_FORCE_DEMO_MODE=true`               | Demo mode, even if a key is set. Useful for a free public demo.                |
 
-**1. The model emits NDJSON, not a JSON document.**
+**Why Claude needs two settings:** a key on its own is not treated as permission to spend money. Without `ALLOW_PAID_PROVIDER=true`, a key copied by accident from another project could start billing you silently.
 
-A single JSON object can only be parsed once it's closed, which means nothing renders until the response finishes. One JSON object _per line_ can be parsed per line:
+---
+
+## Environment variables reference
+
+Every variable is optional. [`.env.example`](.env.example) has the full list with detailed comments.
+
+| Variable                      | Default                 | What it does                                                            |
+| ----------------------------- | ----------------------- | ----------------------------------------------------------------------- |
+| `GEMINI_API_KEY`              | _(empty)_               | Free Google Gemini key. Turns on live AI reviews.                       |
+| `GEMINI_MODEL`                | `gemini-3.5-flash`      | Default Gemini model. Visitors can switch models in Settings.           |
+| `ANTHROPIC_API_KEY`           | _(empty)_               | Anthropic Claude key (paid).                                            |
+| `ALLOW_PAID_PROVIDER`         | `false`                 | Must be `true` before the Anthropic key is used.                        |
+| `ANTHROPIC_MODEL`             | `claude-opus-5`         | `claude-opus-5`, `claude-sonnet-5` or `claude-haiku-4-5`.               |
+| `ANTHROPIC_EFFORT`            | `high`                  | `low` / `medium` / `high` / `xhigh` / `max`. How hard the model thinks. |
+| `NEXT_PUBLIC_ALLOW_BYO_KEY`   | `true`                  | Lets visitors paste their own key in Settings.                          |
+| `NEXT_PUBLIC_FORCE_DEMO_MODE` | `false`                 | Always use the local engine, even when a key is set.                    |
+| `NEXT_PUBLIC_SITE_URL`        | `http://localhost:3000` | Public URL, used in metadata.                                           |
+| `NEXT_PUBLIC_REPO_URL`        | _(empty)_               | Your GitHub repo URL. Adds a "Source" link to the footer.               |
+| `TRUSTED_PROXY_HOPS`          | `1`                     | Only needed if you self-host behind your own reverse proxy.             |
+
+---
+
+## Available scripts
+
+| Command          | What it does                                            |
+| ---------------- | ------------------------------------------------------- |
+| `npm run dev`    | Start the development server at `http://localhost:3000` |
+| `npm run build`  | Create an optimised production build                    |
+| `npm run start`  | Serve the production build (run `build` first)          |
+| `npm run lint`   | Check the code with ESLint                              |
+| `npm run format` | Format all files with Prettier                          |
+
+---
+
+## Project structure
+
+```
+codelens-ai/
+├── public/                    static files (Monaco is copied here on install)
+├── scripts/copy-monaco.mjs    copies the Monaco editor into public/
+├── src/
+│   ├── app/
+│   │   ├── page.js                landing page
+│   │   ├── (app)/                 review · dashboard · history · settings pages
+│   │   ├── api/review/route.js    streaming review endpoint (SSE)
+│   │   └── api/health/route.js    reports which AI provider is configured
+│   ├── components/
+│   │   ├── ui/                    buttons, dialogs, inputs (Radix + Tailwind)
+│   │   ├── review/                editor, file manager, finding cards, export
+│   │   ├── dashboard/             charts and metrics
+│   │   ├── history/               saved reviews
+│   │   ├── settings/              settings page
+│   │   └── layout/                app shell, command palette, theme toggle
+│   ├── lib/
+│   │   ├── ai/                    prompt, stream parsing, demo reviewer, providers
+│   │   ├── analysis/              local rule engine (static-rules.js)
+│   │   ├── export/                PDF · Markdown · JSON · Zip reports
+│   │   ├── validation/            zod schemas shared by client and server
+│   │   ├── samples.js             built-in sample components
+│   │   └── scoring.js             0–100 quality score
+│   ├── store/                     Zustand stores: review · history · settings
+│   └── hooks/                     streaming, uploads, hydration, media query
+├── .env.example               template for your .env.local
+├── Dockerfile                 container build
+├── DEPLOY.md                  detailed deployment guide
+└── next.config.mjs            Next.js config and security headers
+```
+
+---
+
+## How it works
+
+### Data flow of one review
+
+```
+paste / upload code
+   ↓
+local rule engine ─────────────────► local findings render (~5 ms)
+   ↓
+POST /api/review   (validated with zod, rate-limited per IP)
+   ↓
+Gemini or Claude, streamed  (or the demo reviewer if no key)
+   ↓
+SSE frames: reasoning │ token │ record │ complete
+   ↓
+NDJSON reader, one finding per line
+   ↓
+merge + de-duplicate with local findings ─► each card renders as it arrives
+   ↓
+score · save to history · export
+```
+
+### Findings stream one at a time
+
+Most "streaming AI" apps stream plain text. This app streams **structured findings**, so each card appears as soon as it is complete. That takes three pieces.
+
+**1. The model writes NDJSON, not one big JSON document.** A JSON object can only be parsed once it is closed. One JSON object _per line_ can be parsed line by line:
 
 ```jsonc
 {"type":"summary","overview":"…","strengths":["…"]}
@@ -46,9 +298,7 @@ A single JSON object can only be parsed once it's closed, which means nothing re
 {"type":"done","verdict":"…","topPriorities":["…"]}
 ```
 
-**2. A rolling buffer emits complete lines as they close.**
-
-Tokens almost never land on a line boundary, so [`createNdjsonReader`](src/lib/ai/stream.js) holds the partial tail and flushes each complete line:
+**2. A rolling buffer emits each line once it is complete.** Tokens rarely end exactly on a line break, so [`createNdjsonReader`](src/lib/ai/stream.js) keeps the unfinished tail and passes on every finished line:
 
 ```js
 push(chunk) {
@@ -62,325 +312,104 @@ push(chunk) {
 }
 ```
 
-A line that fails to parse is dropped, not thrown — one malformed record never kills a review that's 80% delivered.
+A line that fails to parse is skipped instead of crashing the review.
 
-**3. The route handler speaks a typed SSE dialect.**
-
-[`/api/review`](src/app/api/review/route.js) tags each frame (`reasoning`, `token`, `record`, `warning`, `error`, `complete`) so the client routes reasoning tokens to the thinking panel and review tokens to the NDJSON reader without sniffing payload shapes.
-
-### The demo never dead-ends
-
-Without an API key the app runs the **same pipeline** against a local analysis engine — same SSE envelope, same records, same client code path, same UI. Not a canned response: [`demo-reviewer.js`](src/lib/ai/demo-reviewer.js) runs the real rule engine over the visitor's actual code, seeded deterministically from the input hash so the same code always produces the same review.
-
-A recruiter opening the deployed link gets a complete working product, and it costs nothing per visit.
-
-### The local pass is a floor, not a fallback
-
-[`static-rules.js`](src/lib/analysis/static-rules.js) is ~20 heuristic rules that run before any request goes out. It grounds the AI review — findings are merged and de-duplicated by `(file, category, line ± 3)`, with the model's version winning because it carries a fix.
-
-Each rule declares a `confidence`, and the UI shows it, because regex heuristics are not an AST and pretending otherwise is dishonest. Comments are stripped before matching; string _contents_ are preserved for rules that legitimately match inside quotes (`target="_blank"`, a credential assigned to a literal) and masked only for rules matching code constructs (`eval(`, `==`).
-
-### Prompt engineering that changes the output
-
-Two decisions in [`prompt.js`](src/lib/ai/prompt.js) that materially affect quality:
-
-- **"Report everything, we filter downstream."** Telling a modern model to _only report important issues_ makes it apply that filter itself and silently drop real findings — recall falls while the analysis stays just as thorough. Severity is metadata here, not a gate.
-- **Line-numbered input.** Every line is prefixed `  42 | …` so the model can cite locations precisely. The prefix is stripped before anything reaches the user.
-
-The system prompt is byte-identical across requests and marked `cache_control: ephemeral`, so it's re-read at roughly a tenth of the input cost.
-
-### Derived state instead of synced state
-
-React 19's `react-hooks/set-state-in-effect` rule flags the ubiquitous hydration gate:
-
-```js
-const [mounted, setMounted] = useState(false);
-useEffect(() => setMounted(true), []); // ← cascading render, every time
-```
-
-Replaced throughout with [`useIsHydrated`](src/hooks/use-is-hydrated.js), built on `useSyncExternalStore` — `false` on the server, `true` on the client, no effect and no second render pass. The same principle removed synced state from the score dial, the reasoning panel, the landing animation and the chart theming: values that can be _derived_ during render aren't stored.
-
-### Cancellation actually cancels
-
-Aborting the client fetch closes the response body → the route handler observes `request.signal` → the upstream model request is aborted. A cancelled review stops costing money immediately, rather than finishing invisibly.
-
----
-
-## Demo mode
-
-| Configuration                            | What runs                                                            |
-| ---------------------------------------- | -------------------------------------------------------------------- |
-| No `.env.local` at all                   | Local analysis engine. Everything works, but it isn't a model.       |
-| **`GEMINI_API_KEY` set**                 | **Live streaming from `gemini-3.5-flash` — free, no card**           |
-| Both keys set                            | Gemini wins. The paid provider also needs `ALLOW_PAID_PROVIDER=true` |
-| `ANTHROPIC_API_KEY` set                  | Live streaming from `claude-opus-5` (takes precedence)               |
-| Visitor pastes their own key in Settings | Live on their key, held in their browser only                        |
-| `NEXT_PUBLIC_FORCE_DEMO_MODE=true`       | Local engine even when a key exists                                  |
-
-```bash
-cp .env.example .env.local
-# then add GEMINI_API_KEY — free at https://aistudio.google.com/apikey
-```
-
-Keys are read in a server route handler and never reach the browser. `GET /api/health` reports _which provider and model_ are configured, never the key.
+**3. The API route sends typed Server-Sent Events.** [`/api/review`](src/app/api/review/route.js) labels each frame (`reasoning`, `token`, `record`, `warning`, `error`, `complete`). That way the client sends reasoning to the thinking panel and review text to the NDJSON reader.
 
 ### Two providers, one pipeline
 
-[`providers/`](src/lib/ai/providers) holds one module per service behind a common `stream(...) → SSE` signature. Nothing downstream knows which one ran: the NDJSON contract is carried by the _prompt_, not by an SDK, so the parser, the store and the UI are identical either way.
+[`src/lib/ai/providers/`](src/lib/ai/providers) has one module per AI service, and all of them return the same stream format. The output format is defined by the _prompt_, not by an SDK, so the parser, store and UI work the same whichever provider runs.
 
-Gemini is plain `fetch` — one POST and a read loop. Three details there each break streaming _silently_ rather than erroring, and are commented in [`gemini.js`](src/lib/ai/providers/gemini.js): `?alt=sse` is mandatory (without it you get one streamed JSON array and an SSE reader finds nothing); every chunk is a full `GenerateContentResponse`, not a delta; and a part with `thought: true` is reasoning, so concatenating all parts splices the model's private thinking into the review.
+The Gemini module uses plain `fetch`. [`gemini.js`](src/lib/ai/providers/gemini.js) documents three details that break streaming silently:
 
-### Who may choose the model
+- `?alt=sse` is required in the URL.
+- Every chunk is a full response, not a delta.
+- Parts marked `thought: true` are the model's reasoning and must be kept out of the review.
 
-Settings shows a **model picker only when the configured provider is free**. That is the whole access-control rule, and it falls out of one asymmetry:
+The Anthropic module ([`anthropic.js`](src/lib/ai/providers/anthropic.js)) keeps a per-model capability map, because Claude models don't all accept the same parameters. For example, `claude-haiku-4-5` rejects `effort`, and sending an unsupported parameter fails the request.
 
-- **Gemini** — every id in the allowlist is free-tier, so a stranger picking the "best" one cannot run up a bill. The worst case is spending a free quota, which the per-IP rate limit already bounds. Selectable.
-- **Anthropic** — billed per token. The model is read from server env only, and [`streamFromAnthropic`](src/lib/ai/providers/anthropic.js) never destructures a `model` argument, so a client-supplied value is ignored _structurally_ rather than by a check that could be got wrong.
+### Demo mode uses the same pipeline
 
-The allowlist lives in [`models.js`](src/lib/ai/providers/models.js), and every id in it was confirmed by calling `:streamGenerateContent` with a newly issued free key rather than by reading the docs. That distinction earned its keep: `gemini-2.5-flash` and `gemini-2.5-flash-lite` are documented **Stable** and **"Free of charge"**, still appear in `ListModels`, and return **404 "no longer available to new users"**. `gemini-2.5-pro` returns **429 on the first request ever made** — its free-tier limit is zero, so "free" there is a price with no entitlement behind it. Three of seven plausible candidates failed, and none failed the way the documentation predicted. An unrecognised value — a paid id, a made-up one, a path-traversal attempt — falls back to the configured default rather than erroring, so a stale value in someone's `localStorage` degrades quietly instead of breaking their review.
+Without an API key, the app runs the **same pipeline** against a local engine: the same stream format, client code and UI. It is not a canned response. [`demo-reviewer.js`](src/lib/ai/demo-reviewer.js) runs the real rule engine over your actual code. It is seeded from a hash of the input, so the same code always gives the same review. A deployed demo therefore works fully and costs nothing per visitor.
 
-### The Messages API is not uniform across models
+### The local rule engine
 
-Sending an unsupported parameter is a hard 400, not a silent ignore — so [`anthropic.js`](src/lib/ai/providers/anthropic.js) keeps a per-model capability map and builds only what that model accepts.
+[`static-rules.js`](src/lib/analysis/static-rules.js) has about 20 heuristic rules that run before any request goes out. Local and AI findings are merged and de-duplicated by `(file, category, line ± 3)`. When both report the same issue, the AI version wins because it includes a fix. Each rule declares a `confidence` level and the UI shows it, since regex rules are less precise than a full code parser.
 
-This started as a real bug: the route sent `output_config.effort` and `thinking: {type:'adaptive'}` unconditionally, so setting `ANTHROPIC_MODEL=claude-haiku-4-5` — the obvious way to cut cost — failed _every_ request. Haiku 4.5 rejects `effort` at every level, so the field has to be dropped entirely rather than down-shifted, and its only thinking mode is the older `budget_tokens` form. An unknown model falls back to the smallest request every model accepts: it loses the reasoning panel, but it cannot 400.
+### Prompt design
 
----
+Two choices in [`prompt.js`](src/lib/ai/prompt.js) make a real difference to quality:
 
-## Architecture
+- **"Report everything; we filter later."** Asking a model to report only important issues makes it silently drop real findings. Here severity is a label, not a filter.
+- **Line-numbered input.** Each line is sent as `  42 | …` so the model can cite exact lines. The prefix is removed before anything is shown.
 
-```
-src/
-├── app/
-│   ├── (app)/                 review · dashboard · history · settings
-│   ├── api/review/route.js    SSE streaming endpoint
-│   └── api/health/route.js    capability probe
-├── components/
-│   ├── ui/                    Radix + CVA primitives
-│   ├── review/                workspace, editor, findings, export
-│   ├── dashboard/             charts and metrics
-│   └── layout/                shell, command palette, theme
-├── lib/
-│   ├── ai/                    prompt · NDJSON+SSE parsing · demo reviewer
-│   ├── analysis/              local rule engine
-│   ├── export/                PDF · Markdown · JSON · Zip
-│   ├── validation/            zod schemas, shared client and server
-│   └── scoring.js             severity-weighted score
-├── store/                     zustand: review · history · settings
-└── hooks/                     streaming, uploads, hydration, media query
-```
+The system prompt is identical on every request, so Claude can cache it. Cached input costs about a tenth of the normal price.
 
-### Data flow of one review
+### Who can choose the model
 
-```
-paste/upload
-   ↓
-local rule engine ──────────────────► findings render (~5ms)
-   ↓
-POST /api/review  (zod-validated, rate-limited)
-   ↓
-Anthropic Messages API, streamed
-   ↓
-SSE frames: reasoning │ token │ record │ complete
-   ↓
-NDJSON reader, one record per line
-   ↓
-merge + dedupe vs local findings ───► each card renders as it closes
-   ↓
-score · save to history · export
-```
+Settings shows a **model picker only when the provider is free (Gemini)**. Every model in the allowlist ([`models.js`](src/lib/ai/providers/models.js)) is on the free tier, so a visitor can't run up a bill. The paid Claude model is read only from server environment variables. Any model a visitor sends is ignored. An unknown model id falls back to the default instead of causing an error.
+
+### Cancelling a review stops the cost
+
+When you cancel, the browser aborts its request. The API route notices and aborts the upstream AI request too, so a cancelled review stops costing money immediately.
 
 ---
 
 ## Security
 
-- Anthropic key server-side only; never in a client bundle
-- CSP, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy` on every response
-- Every request body validated with a zod schema before use
-- Per-IP sliding-window rate limit on the review endpoint
-- No accounts, credentials or sessions exist at all — see below
-- Provider errors mapped to safe messages — no internals or key material leak to the browser
-
-### Two bugs only a browser could find
-
-Both survived a clean build, a zero-warning lint and a green API smoke test. Neither is visible without opening the app in Chrome.
-
-**Monaco was loaded from a CDN that our own CSP blocked.** `@monaco-editor/react` defaults to fetching the editor from jsdelivr; `script-src 'self'` refused it, and the component has no error path — so the editor pane read _"Loading…"_ forever. The editor is now [vendored into `/public`](scripts/copy-monaco.mjs) at install time and served same-origin. It also works offline, and drops a third-party dependency off the critical path.
-
-That exposed the deeper problem: **a failure that never surfaces**. [`useMonacoLoader`](src/hooks/use-monaco-loader.js) now drives `loader.init()` directly, so a rejection becomes a real error state and a timeout catches the hang that never rejects. When it fails you get a plain-text editor and a retry — degraded, but you can still work.
-
-**The workspace mounted two editors.** The responsive layout rendered the tree twice and hid one with `hidden lg:flex` / `lg:hidden`. CSS hides a subtree; it does not unmount it — so every visitor loaded two Monaco instances and saw one. [`useMediaQuery`](src/hooks/use-media-query.js) now picks one layout, and the DOM node count for the workspace halved.
-
-### No accounts, on purpose
-
-There is no sign-in, and that is the design rather than a gap.
-
-Every piece of state this app holds — your files, your review history, your settings — lives in **your own browser**. There is no server-side record of any of it. A login would therefore have authenticated you against your own `localStorage`: a gate with nothing behind it, protecting your data from you.
-
-Earlier versions had three separate attempts at it — email/password accounts in `localStorage` with a hand-rolled PBKDF2 hash and self-signed session token, a canvas captcha, a server-verified email code flow, and finally real Google OAuth through Auth.js. All of them worked. All of them are deleted, along with `next-auth`, `crypto-js` and `js-cookie`.
-
-What removing it bought:
-
-- **No credentials to leak.** No password store, no user table, no session secret, no OAuth client secret.
-- **Every page is static again.** `/dashboard`, `/review`, `/history` and `/settings` are prerendered; they were server-rendered on every request purely to resolve a session.
-- **No edge middleware at all** — `proxy.js` existed only to gate routes.
-- **Nothing between a visitor and the product.** Open the link, paste code, get a review.
-
-If this ever grows a backend, authentication comes back with something real to protect. Adding it before that point is theatre.
-
----
-
-## Demo mode
-
-| Configuration                            | What runs                                                            |
-| ---------------------------------------- | -------------------------------------------------------------------- |
-| No `.env.local` at all                   | Local analysis engine. Everything works, but it isn't a model.       |
-| **`GEMINI_API_KEY` set**                 | **Live streaming from `gemini-3.5-flash` — free, no card**           |
-| Both keys set                            | Gemini wins. The paid provider also needs `ALLOW_PAID_PROVIDER=true` |
-| `ANTHROPIC_API_KEY` set                  | Live streaming from `claude-opus-5` (takes precedence)               |
-| Visitor pastes their own key in Settings | Live on their key, held in their browser only                        |
-| `NEXT_PUBLIC_FORCE_DEMO_MODE=true`       | Local engine even when a key exists                                  |
-
-```bash
-cp .env.example .env.local
-# then add GEMINI_API_KEY — free at https://aistudio.google.com/apikey
-```
-
-Keys are read in a server route handler and never reach the browser. `GET /api/health` reports _which provider and model_ are configured, never the key.
-
-### Two providers, one pipeline
-
-[`providers/`](src/lib/ai/providers) holds one module per service behind a common `stream(...) → SSE` signature. Nothing downstream knows which one ran: the NDJSON contract is carried by the _prompt_, not by an SDK, so the parser, the store and the UI are identical either way.
-
-Gemini is plain `fetch` — one POST and a read loop. Three details there each break streaming _silently_ rather than erroring, and are commented in [`gemini.js`](src/lib/ai/providers/gemini.js): `?alt=sse` is mandatory (without it you get one streamed JSON array and an SSE reader finds nothing); every chunk is a full `GenerateContentResponse`, not a delta; and a part with `thought: true` is reasoning, so concatenating all parts splices the model's private thinking into the review.
-
-### Who may choose the model
-
-Settings shows a **model picker only when the configured provider is free**. That is the whole access-control rule, and it falls out of one asymmetry:
-
-- **Gemini** — every id in the allowlist is free-tier, so a stranger picking the "best" one cannot run up a bill. The worst case is spending a free quota, which the per-IP rate limit already bounds. Selectable.
-- **Anthropic** — billed per token. The model is read from server env only, and [`streamFromAnthropic`](src/lib/ai/providers/anthropic.js) never destructures a `model` argument, so a client-supplied value is ignored _structurally_ rather than by a check that could be got wrong.
-
-The allowlist lives in [`models.js`](src/lib/ai/providers/models.js), and every id in it was confirmed by calling `:streamGenerateContent` with a newly issued free key rather than by reading the docs. That distinction earned its keep: `gemini-2.5-flash` and `gemini-2.5-flash-lite` are documented **Stable** and **"Free of charge"**, still appear in `ListModels`, and return **404 "no longer available to new users"**. `gemini-2.5-pro` returns **429 on the first request ever made** — its free-tier limit is zero, so "free" there is a price with no entitlement behind it. Three of seven plausible candidates failed, and none failed the way the documentation predicted. An unrecognised value — a paid id, a made-up one, a path-traversal attempt — falls back to the configured default rather than erroring, so a stale value in someone's `localStorage` degrades quietly instead of breaking their review.
-
-### The Messages API is not uniform across models
-
-Sending an unsupported parameter is a hard 400, not a silent ignore — so [`anthropic.js`](src/lib/ai/providers/anthropic.js) keeps a per-model capability map and builds only what that model accepts.
-
-This started as a real bug: the route sent `output_config.effort` and `thinking: {type:'adaptive'}` unconditionally, so setting `ANTHROPIC_MODEL=claude-haiku-4-5` — the obvious way to cut cost — failed _every_ request. Haiku 4.5 rejects `effort` at every level, so the field has to be dropped entirely rather than down-shifted, and its only thinking mode is the older `budget_tokens` form. An unknown model falls back to the smallest request every model accepts: it loses the reasoning panel, but it cannot 400.
-
----
-
-## Architecture
-
-```
-src/
-├── app/
-│   ├── (app)/                 review · dashboard · history · settings
-│   ├── api/review/route.js    SSE streaming endpoint
-│   └── api/health/route.js    capability probe
-├── components/
-│   ├── ui/                    Radix + CVA primitives
-│   ├── review/                workspace, editor, findings, export
-│   ├── dashboard/             charts and metrics
-│   └── layout/                shell, command palette, theme
-├── lib/
-│   ├── ai/                    prompt · NDJSON+SSE parsing · demo reviewer
-│   ├── analysis/              local rule engine
-│   ├── export/                PDF · Markdown · JSON · Zip
-│   ├── validation/            zod schemas, shared client and server
-│   └── scoring.js             severity-weighted score
-├── store/                     zustand: review · history · settings
-└── hooks/                     streaming, uploads, hydration, media query
-```
-
-### Data flow of one review
-
-```
-paste/upload
-   ↓
-local rule engine ──────────────────► findings render (~5ms)
-   ↓
-POST /api/review  (zod-validated, rate-limited)
-   ↓
-Anthropic Messages API, streamed
-   ↓
-SSE frames: reasoning │ token │ record │ complete
-   ↓
-NDJSON reader, one record per line
-   ↓
-merge + dedupe vs local findings ───► each card renders as it closes
-   ↓
-score · save to history · export
-```
-
----
-
-## Security
-
-- Anthropic key server-side only; never in a client bundle
-- CSP, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy` on every response
-- Every request body validated with a zod schema before use
-- Per-IP sliding-window rate limit on the review endpoint
-- No accounts, credentials or sessions exist at all — see below
-- Provider errors mapped to safe messages — no internals or key material leak to the browser
-
-### Two bugs only a browser could find
-
-Both survived a clean build, a zero-warning lint and a green API smoke test. Neither is visible without opening the app in Chrome.
-
-**Monaco was loaded from a CDN that our own CSP blocked.** `@monaco-editor/react` defaults to fetching the editor from jsdelivr; `script-src 'self'` refused it, and the component has no error path — so the editor pane read _"Loading…"_ forever. The editor is now [vendored into `/public`](scripts/copy-monaco.mjs) at install time and served same-origin. It also works offline, and drops a third-party dependency off the critical path.
-
-That exposed the deeper problem: **a failure that never surfaces**. [`useMonacoLoader`](src/hooks/use-monaco-loader.js) now drives `loader.init()` directly, so a rejection becomes a real error state and a timeout catches the hang that never rejects. When it fails you get a plain-text editor and a retry — degraded, but you can still work.
-
-**The workspace mounted two editors.** The responsive layout rendered the tree twice and hid one with `hidden lg:flex` / `lg:hidden`. CSS hides a subtree; it does not unmount it — so every visitor loaded two Monaco instances and saw one. [`useMediaQuery`](src/hooks/use-media-query.js) now picks one layout, and the DOM node count for the workspace halved.
+- API keys are used only on the server and never reach the browser bundle.
+- Security headers on every response: CSP, `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`.
+- Every request body is validated with a `zod` schema.
+- A per-IP sliding-window rate limit protects the review endpoint.
+- Provider errors are mapped to safe messages, so no internal details or keys leak.
+- **No accounts on purpose.** All data lives in your browser, so a login would have nothing to protect. That also means there are no passwords, sessions or user tables that could leak.
 
 ## Accessibility
 
-Keyboard operable throughout, with a visible focus ring on every control and a skip link as the first tab stop. Form fields carry labels and `aria-describedby`; validation errors are announced via `role="alert"`; streaming status via `aria-live`. Every animation is gated on `prefers-reduced-motion`. Charts never encode identity in colour alone — legends and text labels throughout.
+Every part of the app works with the keyboard, has a visible focus ring, and starts with a skip link. Form fields have labels. Errors are announced to screen readers with `role="alert"`, and streaming status with `aria-live`. Animations respect `prefers-reduced-motion`. Charts use legends and text labels, not just colour.
 
 ---
 
-## Scripts
+## Deployment
 
-```bash
-npm run dev        # dev server
-npm run build      # production build
-npm run start      # serve the build
-npm run lint       # eslint — currently zero errors, zero warnings
-npm run format     # prettier
-```
+**Vercel (easiest):** import the GitHub repo at [vercel.com](https://vercel.com) and click deploy. With no environment variables set, the site runs in demo mode and costs nothing. Add `GEMINI_API_KEY` in the Vercel project settings for free live AI.
 
-## Deploy
+**Netlify:** a [`netlify.toml`](netlify.toml) is included.
 
-**Vercel** — import the repo and deploy. Set **no** environment variables: the app runs the local engine and costs nothing per visitor.
-
-See **[DEPLOY.md](DEPLOY.md)** for the full guide — free hosting tiers, the one configuration mistake that costs money, running live mode locally, and a script for recording a demo.
-
-**Docker**
+**Docker:**
 
 ```bash
 docker build -t codelens .
-docker run -p 3000:3000 -e ANTHROPIC_API_KEY=sk-ant-… codelens
+docker run -p 3000:3000 -e GEMINI_API_KEY=your-key-here codelens
 ```
 
----
-
-## Keyboard
-
-|                 |                                      |
-| --------------- | ------------------------------------ |
-| `⌘K` / `Ctrl+K` | Command palette                      |
-| `⌘↵` / `Ctrl+↵` | Run review — or cancel one in flight |
-| `Esc`           | Close dialog or palette              |
+See **[DEPLOY.md](DEPLOY.md)** for the full guide, including free hosting tiers, the one configuration mistake that costs money, and how to record a demo.
 
 ---
 
-## Notes
+## Troubleshooting
 
-- **JavaScript, not TypeScript**, by requirement. Runtime validation carries the weight instead: zod schemas at both boundaries, and model output normalised and type-coerced in [`normalizeRecord`](src/lib/ai/stream.js) before it reaches a renderer.
-- **No test suite**, by requirement.
-- Review history is per-browser. Clearing site data clears it.
+| Problem                                         | Fix                                                                                                         |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Reviews say "demo" even though I added a key    | Make sure the file is named `.env.local` (not `.env.example`), then restart `npm run dev`.                  |
+| The editor shows "Loading…" or a plain text box | Run `npm install` again (or `npm run vendor:monaco`) to copy Monaco into `public/monaco`.                   |
+| Gemini returns 404 "no longer available"        | Use a model listed in `.env.example`, such as `gemini-3.5-flash`. Avoid `gemini-2.5-*` and `*-preview` ids. |
+| The Claude key is ignored                       | Set `ALLOW_PAID_PROVIDER=true`, and remove `GEMINI_API_KEY` (Gemini takes priority).                        |
+| "Too many reviews requested"                    | The rate limit was hit. Wait a minute and try again.                                                        |
+| `npm install` fails                             | Check that `node -v` shows 20.9 or newer.                                                                   |
+| My review history is gone                       | History is stored in the browser, so clearing site data deletes it.                                         |
+
+---
+
+## Keyboard shortcuts
+
+| Shortcut        | Action                                  |
+| --------------- | --------------------------------------- |
+| `Ctrl+K` / `⌘K` | Open the command palette                |
+| `Ctrl+↵` / `⌘↵` | Run a review, or cancel one in progress |
+| `Esc`           | Close a dialog or the palette           |
+
+---
 
 ## Licence
 
